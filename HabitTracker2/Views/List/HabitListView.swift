@@ -53,25 +53,40 @@ struct HabitListView: View {
 }
 
 #Preview("Habit List") {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Habit.self, HabitEntry.self, configurations: config)
+    HabitListPreviewWrapper()
+}
+
+struct HabitListPreviewWrapper:View {
+    let container: ModelContainer
+    let viewModel: HabitViewModel
     
-    // Add sample data
-    let context = container.mainContext
-    let sampleHabits = [
-        Habit(type: .focusedWork, streakCount: 7, reminderEnabled: true),
-        Habit(type: .water, streakCount: 3),
-        Habit(type: .mindfulness, streakCount: 12, reminderEnabled: true),
-        Habit(type: .reading, streakCount: 5),
-        Habit(type: .dailyWalk, streakCount: 2),
-        Habit(type: .screenOff, streakCount: 4)
-    ]
-    
-    for habit in sampleHabits {
-        context.insert(habit)
+    init() {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try! ModelContainer(for: Habit.self, HabitEntry.self, configurations: config)
+        
+        // Add sample data
+        let context = container.mainContext
+        let sampleHabits = [
+            Habit(type: .focusedWork, streakCount: 7, reminderEnabled: true),
+            Habit(type: .water, streakCount: 3),
+            Habit(type: .mindfulness, streakCount: 12, reminderEnabled: true),
+            Habit(type: .reading, streakCount: 5),
+            Habit(type: .dailyWalk, streakCount: 2),
+            Habit(type: .screenOff, streakCount: 4)
+        ]
+        
+        for habit in sampleHabits {
+            context.insert(habit)
+        }
+        
+        let vm = HabitViewModel()
+        vm.modelContext = context
+        self.viewModel = vm
     }
     
-    return HabitListView()
-        .environmentObject(HabitViewModel(modelContext: context))
-        .modelContainer(container)
+    var body: some View {
+        return HabitListView()
+            .environmentObject(viewModel)
+            .modelContainer(container)
+    }
 }

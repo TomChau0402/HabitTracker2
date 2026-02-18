@@ -82,7 +82,7 @@ class HabitViewModel: ObservableObject {
     }
     
     // MARK: - Private Methods
-    private func createDefaultHabitsIfNeeded() {
+    func createDefaultHabitsIfNeeded() {
         let descriptor = FetchDescriptor<Habit>()
         let existingHabits = (try? modelContext.fetch(descriptor)) ?? []
         
@@ -103,25 +103,37 @@ class HabitViewModel: ObservableObject {
 }
 
 #Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Habit.self, HabitEntry.self, configurations: config)
+    PreviewWrapper()
+}
+
+struct PreviewWrapper:View {
+    let viewModel: HabitViewModel
+    let container: ModelContainer
     
-//    let viewModel = HabitViewModel(modelContext: container.mainContext)
-    let viewModel = HabitViewModel()
-    viewModel.modelContext = container.mainContext
-    viewModel.createDefaultHabitsIfNeeded()
-    
-    return VStack {
-        Text("ViewModel Preview")
-            .font(.headline)
+    init() {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try! ModelContainer(for: Habit.self, HabitEntry.self, configurations: config)
         
-        Text("Habits count: \(viewModel.habits.count)")
-        
-        Button("Add Sample Habit") {
-            viewModel.addHabit(type: .focusedWork)
-        }
+        //    let viewModel = HabitViewModel(modelContext: container.mainContext)
+        let vm = HabitViewModel()
+        vm.modelContext = container.mainContext
+        vm.createDefaultHabitsIfNeeded()
+        self.viewModel = vm
     }
-    .padding()
-    .modelContainer(container)
+    
+    var body: some View {
+        VStack {
+            Text("ViewModel Preview")
+                .font(.headline)
+            
+            Text("Habits count: \(viewModel.habits.count)")
+            
+            Button("Add Sample Habit") {
+                viewModel.addHabit(type: .focusedWork)
+            }
+        }
+        .padding()
+        .modelContainer(container)
+    }
 }
 

@@ -126,17 +126,34 @@ struct HabitFormView: View {
     }
 }
 
-// MARK: - Previews (FIXED with all required parameters)
 #Preview("New Habit Form") {
-    // Create container and context
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Habit.self, HabitEntry.self, configurations: config)
-    let context = container.mainContext
-    let viewModel = HabitViewModel(modelContext: context)
-    
-    // Return the view without using 'return' keyword
-    HabitFormView()
-        .environmentObject(viewModel)
-        .modelContainer(container)
+    HabitFormPreviewView()
 }
+
+struct HabitFormPreviewView: View {
+    let container: ModelContainer
+    let viewModel: HabitViewModel
+    
+    init() {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try! ModelContainer(for: Habit.self, HabitEntry.self, configurations: config)
+        
+        let vm = HabitViewModel()
+        vm.modelContext = container.mainContext
+        vm.createDefaultHabitsIfNeeded()
+        self.viewModel = vm
+        // Return the view without using 'return' keyword
+    }
+    var body: some View {
+        // Create container and context
+        HabitFormView()
+            .environmentObject(viewModel)
+            .modelContainer(container)
+    }
+}
+
+// MARK: - Previews (FIXED with all required parameters)
+
+
+
 
