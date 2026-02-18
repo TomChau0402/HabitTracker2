@@ -9,13 +9,15 @@ import Combine
 
 @MainActor
 class HabitViewModel: ObservableObject {
-    private var modelContext: ModelContext
+//    private var modelContext: ModelContext
+    var modelContext: ModelContext!
     @Published var selectedDate = Date()
     
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-        createDefaultHabitsIfNeeded()
-    }
+    init() {}
+//    init(modelContext: ModelContext) {
+//        self.modelContext = modelContext
+//        createDefaultHabitsIfNeeded()
+//    }
     
     var habits: [Habit] {
         let descriptor = FetchDescriptor<Habit>(sortBy: [SortDescriptor(\.createdAt)])
@@ -103,16 +105,23 @@ class HabitViewModel: ObservableObject {
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: Habit.self, HabitEntry.self, configurations: config)
-    let viewModel = HabitViewModel(modelContext: container.mainContext)
+    
+//    let viewModel = HabitViewModel(modelContext: container.mainContext)
+    let viewModel = HabitViewModel()
+    viewModel.modelContext = container.mainContext
+    viewModel.createDefaultHabitsIfNeeded()
     
     return VStack {
         Text("ViewModel Preview")
             .font(.headline)
+        
         Text("Habits count: \(viewModel.habits.count)")
+        
         Button("Add Sample Habit") {
             viewModel.addHabit(type: .focusedWork)
         }
     }
     .padding()
+    .modelContainer(container)
 }
 

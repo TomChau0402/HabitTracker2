@@ -7,7 +7,7 @@ import Combine
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var viewModel: HabitViewModel
+    @StateObject private var viewModel = HabitViewModel()
     @Query private var habits: [Habit]
     @State private var showingForm = false
     @State private var selectedHabit: Habit?
@@ -15,7 +15,8 @@ struct HomeView: View {
     
     init() {
         // Temporary initialization - will be updated in onAppear
-        _viewModel = StateObject(wrappedValue: HabitViewModel(modelContext: ModelContext()))
+        _viewModel = StateObject(wrappedValue: HabitViewModel())
+//        _viewModel = StateObject(wrappedValue: HabitViewModel(modelContext: ModelContext()))
     }
     
     var body: some View {
@@ -107,6 +108,7 @@ struct HomeView: View {
         .onAppear {
             // Update viewModel with modelContext
             viewModel.modelContext = modelContext
+            viewModel.createDefaultHabitsIfNeeded()
         }
     }
     
