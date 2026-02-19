@@ -4,63 +4,142 @@
 //
 
 import SwiftUI
-import Combine
 
 struct HabitRowView: View {
     let habit: Habit
     
+    // Custom colors matching HomeView
+    private let primaryGradient = LinearGradient(
+        colors: [Color.blue, Color.cyan.opacity(0.8)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
     var body: some View {
-        HStack(spacing: 15) {
-            // Icon
+        HStack(spacing: 16) {
+            // Icon with gradient background
             ZStack {
                 Circle()
-                    .fill(Color.blue.opacity(0.2))
-                    .frame(width: 40, height: 40)
+                    .fill(
+                        LinearGradient(
+                            colors: habit.isCompletedToday ?
+                                [Color.green, Color.mint] :
+                                [Color.blue, Color.cyan],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 48, height: 48)
+                    .opacity(0.15)
                 
                 Image(systemName: habit.type.icon)
-                    .foregroundColor(.blue)
+                    .font(.title3)
+                    .foregroundColor(habit.isCompletedToday ? .green : .blue)
             }
             
             // Details
-            VStack(alignment: .leading, spacing: 4) {
-                Text(habit.type.rawValue)
-                    .font(.headline)
-                
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text("Target: \(habit.type.targetDisplayValue)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    Text(habit.type.rawValue)
+                        .font(.headline)
+                        .fontWeight(.semibold)
                     
+                    Spacer()
+                    
+                    // Reminder indicator
                     if habit.reminderEnabled {
-                        Image(systemName: "bell.fill")
-                            .font(.caption)
-                            .foregroundColor(.blue)
+                        HStack(spacing: 4) {
+                            Image(systemName: "bell.fill")
+                                .font(.caption2)
+                            if let reminderTime = habit.reminderTime {
+                                Text(reminderTime, style: .time)
+                                    .font(.caption2)
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.blue.opacity(0.1))
+                        .clipShape(Capsule())
+                        .foregroundColor(.blue)
                     }
+                }
+                
+                HStack(spacing: 12) {
+                    // Target pill
+                    Label {
+                        Text(habit.type.targetDisplayValue)
+                            .font(.caption2)
+                    } icon: {
+                        Image(systemName: "target")
+                            .font(.caption2)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.gray.opacity(0.1))
+                    .clipShape(Capsule())
+                    .foregroundColor(.secondary)
+                    
+                    // Streak indicator
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame.fill")
+                            .font(.caption2)
+                            .foregroundColor(.orange)
+                        Text("\(habit.streakCount) day\(habit.streakCount == 1 ? "" : "s")")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.orange.opacity(0.1))
+                    .clipShape(Capsule())
+                    .foregroundColor(.orange)
                 }
             }
             
             Spacer()
             
-            // Streak
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("\(habit.streakCount)")
+            // Completion indicator
+            if habit.isCompletedToday {
+                Image(systemName: "checkmark.circle.fill")
                     .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(.blue)
-                
-                Text("streak")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.green)
+                    .symbolEffect(.bounce, value: habit.isCompletedToday)
+            } else {
+                Circle()
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.blue.opacity(0.3), Color.cyan.opacity(0.3)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .frame(width: 24, height: 24)
+                    .overlay(
+                        Circle()
+                            .fill(Color.blue.opacity(0.05))
+                            .frame(width: 20, height: 20)
+                    )
             }
         }
-        .padding(.vertical, 4)
-        .background(habit.isCompletedToday ? Color.green.opacity(0.1) : Color.clear)
-        .cornerRadius(8)
+        .padding(.vertical, 8)
+        .opacity(habit.isCompletedToday ? 1 : 0.9)
     }
 }
 
-#Preview("Habit Row - Completed Today") {
-    let habit = Habit(type: .focusedWork, streakCount: 7, reminderEnabled: true)
+// MARK: - Previews
+#Preview("Habit Row - Completed") {
+    let habit = Habit(
+        id: UUID(),
+        type: .focusedWork,
+        streakCount: 7,
+        lastCompletedDate: nil,
+        reminderTime: Date(),
+        reminderEnabled: true,
+        notes: nil
+    )
+    
+    // Mark as completed
     let entry = HabitEntry(value: 30, isCompleted: true)
     entry.habit = habit
     habit.entries = [entry]
@@ -68,23 +147,42 @@ struct HabitRowView: View {
     return List {
         HabitRowView(habit: habit)
     }
+    .listStyle(.plain)
     .previewLayout(.sizeThatFits)
 }
 
-#Preview("Habit Row - Not Completed") {
-    let habit = Habit(type: .water, streakCount: 3)
+#Preview("Habit Row - Incomplete") {
+    let habit = Habit(
+        id: UUID(),
+        type: .water,
+        streakCount: 3,
+        lastCompletedDate: nil,
+        reminderTime: nil,
+        reminderEnabled: false,
+        notes: nil
+    )
     
     return List {
         HabitRowView(habit: habit)
     }
+    .listStyle(.plain)
     .previewLayout(.sizeThatFits)
 }
 
 #Preview("Habit Row - Long Streak") {
-    let habit = Habit(type: .mindfulness, streakCount: 30, reminderEnabled: true)
+    let habit = Habit(
+        id: UUID(),
+        type: .mindfulness,
+        streakCount: 30,
+        lastCompletedDate: nil,
+        reminderTime: Date(),
+        reminderEnabled: true,
+        notes: nil
+    )
     
     return List {
         HabitRowView(habit: habit)
     }
+    .listStyle(.plain)
     .previewLayout(.sizeThatFits)
 }

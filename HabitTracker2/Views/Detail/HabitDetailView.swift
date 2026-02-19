@@ -216,6 +216,6 @@ struct StatCard: View {
         notes: "Sample notes for preview"
     )
     
-    // Create a simple view model
+
     
 }
