@@ -9,18 +9,35 @@ struct CalendarView: View {
     let calendar = Calendar.current
     let daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"]
     
-    // Custom colors matching HomeView
-    private let primaryGradient = LinearGradient(
-        colors: [Color.blue, Color.cyan.opacity(0.8)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    // Enhanced color scheme matching HomeView with darker tones
+    private let deepBlue = Color(red: 0.2, green: 0.4, blue: 0.9)
+    private let teal = Color(red: 0.1, green: 0.7, blue: 0.8)
+    private let darkBlue = Color(red: 0.1, green: 0.2, blue: 0.5)
     
-    private let completedGradient = LinearGradient(
-        colors: [Color.green, Color.mint],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    // Computed properties for gradients
+    private var primaryGradient: LinearGradient {
+        LinearGradient(
+            colors: [deepBlue, teal],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
+    private var completedGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color.green, Color.mint],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
+    private var todayGradient: LinearGradient {
+        LinearGradient(
+            colors: [deepBlue, teal],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -30,11 +47,24 @@ struct CalendarView: View {
                     Image(systemName: "chevron.left")
                         .font(.title3)
                         .fontWeight(.semibold)
-                        .foregroundStyle(primaryGradient)
-                        .frame(width: 36, height: 36)
-                        .background(Color(.secondarySystemBackground))
-                        .clipShape(Circle())
-                        .shadow(color: .blue.opacity(0.1), radius: 3, x: 0, y: 2)
+                        .foregroundColor(.white)
+                        .frame(width: 40, height: 40)
+                        .background(
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [.white.opacity(0.3), teal.opacity(0.3)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1
+                                        )
+                                )
+                        )
+                        .shadow(color: deepBlue.opacity(0.3), radius: 5, x: 0, y: 2)
                 }
                 
                 Spacer()
@@ -42,10 +72,10 @@ struct CalendarView: View {
                 VStack(spacing: 4) {
                     Text(monthYearString)
                         .font(.title3)
-                        .fontWeight(.semibold)
+                        .fontWeight(.bold)
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [Color.primary, Color.blue],
+                                colors: [.white, teal],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -55,9 +85,19 @@ struct CalendarView: View {
                     let completedCount = daysInMonth.compactMap { $0 }.filter { isDateCompleted($0) }.count
                     let totalDays = daysInMonth.compactMap { $0 }.count
                     if totalDays > 0 {
-                        Text("\(completedCount)/\(totalDays) completed")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption2)
+                                .foregroundColor(.green)
+                            Text("\(completedCount)/\(totalDays) completed")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Capsule())
+                        .foregroundColor(.white)
                     }
                 }
                 
@@ -67,11 +107,24 @@ struct CalendarView: View {
                     Image(systemName: "chevron.right")
                         .font(.title3)
                         .fontWeight(.semibold)
-                        .foregroundStyle(primaryGradient)
-                        .frame(width: 36, height: 36)
-                        .background(Color(.secondarySystemBackground))
-                        .clipShape(Circle())
-                        .shadow(color: .blue.opacity(0.1), radius: 3, x: 0, y: 2)
+                        .foregroundColor(.white)
+                        .frame(width: 40, height: 40)
+                        .background(
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [.white.opacity(0.3), teal.opacity(0.3)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1
+                                        )
+                                )
+                        )
+                        .shadow(color: deepBlue.opacity(0.3), radius: 5, x: 0, y: 2)
                 }
             }
             .padding(.horizontal)
@@ -81,9 +134,13 @@ struct CalendarView: View {
                 ForEach(Array(daysOfWeek.enumerated()), id: \.element) { index, day in
                     Text(day)
                         .font(.caption)
-                        .fontWeight(.medium)
+                        .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
-                        .foregroundColor(index == 0 || index == 6 ? .blue.opacity(0.8) : .secondary)
+                        .foregroundColor(
+                            index == 0 || index == 6 ?
+                                teal.opacity(0.9) :
+                                .white.opacity(0.7)
+                        )
                 }
             }
             .padding(.horizontal, 4)
@@ -95,7 +152,9 @@ struct CalendarView: View {
                         DayCell(
                             date: date,
                             isCompleted: isDateCompleted(date),
-                            isToday: calendar.isDateInToday(date)
+                            isToday: calendar.isDateInToday(date),
+                            deepBlue: deepBlue,
+                            teal: teal
                         )
                     } else {
                         Color.clear
@@ -106,56 +165,58 @@ struct CalendarView: View {
             .padding(.horizontal, 4)
             
             // Legend
-            HStack(spacing: 16) {
-                Label {
-                    Text("Completed")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                } icon: {
+            HStack(spacing: 20) {
+                HStack(spacing: 8) {
                     Circle()
                         .fill(completedGradient)
                         .frame(width: 12, height: 12)
+                        .shadow(color: .green.opacity(0.3), radius: 3, x: 0, y: 1)
+                    
+                    Text("Completed")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white.opacity(0.8))
                 }
                 
-                Label {
-                    Text("Today")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                } icon: {
+                HStack(spacing: 8) {
                     Circle()
                         .stroke(
-                            LinearGradient(
-                                colors: [Color.blue, Color.cyan],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
+                            todayGradient,
                             lineWidth: 2
                         )
                         .frame(width: 12, height: 12)
-                        .background(Color.blue.opacity(0.1))
-                        .clipShape(Circle())
+                        .background(
+                            Circle()
+                                .fill(deepBlue.opacity(0.2))
+                                .frame(width: 10, height: 10)
+                        )
+                    
+                    Text("Today")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white.opacity(0.8))
                 }
             }
             .padding(.top, 8)
+            .padding(.bottom, 4)
         }
         .padding()
         .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.secondarySystemBackground))
-                .shadow(color: .blue.opacity(0.1), radius: 10, x: 0, y: 5)
-        )
-        .padding(.horizontal)
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(
-                    LinearGradient(
-                        colors: [Color.blue.opacity(0.3), Color.cyan.opacity(0.3)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.2), teal.opacity(0.3)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
                 )
         )
+        .shadow(color: .black.opacity(0.3), radius: 15, x: 0, y: 8)
     }
     
     var monthYearString: String {
@@ -216,52 +277,73 @@ struct DayCell: View {
     let date: Date
     let isCompleted: Bool
     let isToday: Bool
+    let deepBlue: Color
+    let teal: Color
     
-    // Custom colors
-    private let completedGradient = LinearGradient(
-        colors: [Color.green, Color.mint],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    // Computed properties for gradients
+    private var completedGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color.green, Color.mint],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
     
-    private let todayGradient = LinearGradient(
-        colors: [Color.blue, Color.cyan],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    private var todayGradient: LinearGradient {
+        LinearGradient(
+            colors: [deepBlue, teal],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
     
     var body: some View {
         ZStack {
-            // Background for completed days
+            // Background for completed days with glow
             if isCompleted {
                 Circle()
                     .fill(completedGradient)
-                    .frame(width: 38, height: 38)
-                    .shadow(color: .green.opacity(0.3), radius: 3, x: 0, y: 2)
+                    .frame(width: 40, height: 40)
+                    .shadow(color: .green.opacity(0.4), radius: 8, x: 0, y: 2)
+                
+                // Inner glow
+                Circle()
+                    .fill(Color.white.opacity(0.3))
+                    .frame(width: 20, height: 20)
+                    .blur(radius: 5)
             }
             
-            // Border for today
+            // Border and background for today
             if isToday && !isCompleted {
                 Circle()
                     .stroke(
                         todayGradient,
                         lineWidth: 2.5
                     )
-                    .frame(width: 38, height: 38)
+                    .frame(width: 40, height: 40)
                     .background(
                         Circle()
-                            .fill(Color.blue.opacity(0.1))
-                            .frame(width: 36, height: 36)
+                            .fill(deepBlue.opacity(0.15))
+                            .frame(width: 38, height: 38)
                     )
+                    .shadow(color: deepBlue.opacity(0.3), radius: 5, x: 0, y: 2)
+            }
+            
+            // Background for regular days (ultra thin material)
+            if !isCompleted && !isToday {
+                Circle()
+                    .fill(.ultraThinMaterial)
+                    .frame(width: 36, height: 36)
+                    .opacity(0.5)
             }
             
             // Day number
             Text("\(Calendar.current.component(.day, from: date))")
-                .font(.system(size: 16, weight: isCompleted || isToday ? .semibold : .regular))
+                .font(.system(size: 16, weight: isCompleted || isToday ? .bold : .medium))
                 .foregroundColor(
                     isCompleted ? .white :
-                    isToday ? .blue :
-                    .primary
+                    isToday ? .white :
+                    .white.opacity(0.8)
                 )
         }
         .frame(height: 44)
@@ -269,7 +351,7 @@ struct DayCell: View {
     }
 }
 
-// MARK: - Previews (FIXED PARAMETER ORDER)
+// MARK: - Previews with proper background
 #Preview("Calendar View - With Data") {
     let habit = Habit(
         id: UUID(),
@@ -281,7 +363,7 @@ struct DayCell: View {
         notes: nil
     )
     
-    // Create entries for different dates with correct parameter order
+    // Create entries for different dates
     let calendar = Calendar.current
     let today = Date()
     let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
@@ -289,7 +371,6 @@ struct DayCell: View {
     let threeDaysAgo = calendar.date(byAdding: .day, value: -3, to: today)!
     let lastWeek = calendar.date(byAdding: .day, value: -7, to: today)!
     
-    // Fixed parameter order: id, date, value, isCompleted, notes
     let entries = [
         HabitEntry(id: UUID(), date: today, value: 30, isCompleted: true, notes: nil),
         HabitEntry(id: UUID(), date: yesterday, value: 30, isCompleted: true, notes: nil),
@@ -298,9 +379,18 @@ struct DayCell: View {
         HabitEntry(id: UUID(), date: lastWeek, value: 30, isCompleted: true, notes: nil)
     ]
     
-    CalendarView(habit: habit, entries: entries)
-        .padding()
-        .background(Color(.systemBackground))
+    return ZStack {
+        // Dark gradient background matching HomeView
+        LinearGradient(
+            colors: [Color.black.opacity(0.8), Color(red: 0.1, green: 0.2, blue: 0.5)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+        
+        CalendarView(habit: habit, entries: entries)
+            .padding()
+    }
 }
 
 #Preview("Calendar View - Empty") {
@@ -314,9 +404,17 @@ struct DayCell: View {
         notes: nil
     )
     
-    CalendarView(habit: habit, entries: [])
-        .padding()
-        .background(Color(.systemBackground))
+    return ZStack {
+        LinearGradient(
+            colors: [Color.black.opacity(0.8), Color(red: 0.1, green: 0.2, blue: 0.5)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+        
+        CalendarView(habit: habit, entries: [])
+            .padding()
+    }
 }
 
 #Preview("Calendar View - Dark Mode") {
@@ -333,13 +431,19 @@ struct DayCell: View {
     let calendar = Calendar.current
     let today = Date()
     
-    // Fixed parameter order: id, date, value, isCompleted, notes
     let entries = [
         HabitEntry(id: UUID(), date: today, value: 10, isCompleted: true, notes: nil)
     ]
     
-    CalendarView(habit: habit, entries: entries)
-        .padding()
-        .background(Color(.systemBackground))
-        .preferredColorScheme(.dark)
+    return ZStack {
+        LinearGradient(
+            colors: [Color.black.opacity(0.8), Color(red: 0.1, green: 0.2, blue: 0.5)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+        
+        CalendarView(habit: habit, entries: entries)
+            .padding()
+    }
 }

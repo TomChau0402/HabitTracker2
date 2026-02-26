@@ -1,7 +1,3 @@
-//
-//  HabitListView.swift
-//  HabitTracker2
-
 import SwiftUI
 import SwiftData
 import Combine
@@ -13,115 +9,211 @@ struct HabitListView: View {
     @State private var showingForm = false
     @State private var selectedHabit: Habit?
     
-    // Custom colors matching HomeView
+    // Enhanced color scheme matching HomeView with darker tones
+    private let deepBlue = Color(red: 0.2, green: 0.4, blue: 0.9)
+    private let teal = Color(red: 0.1, green: 0.7, blue: 0.8)
+    private let darkBlue = Color(red: 0.1, green: 0.2, blue: 0.5)
+    
     private let primaryGradient = LinearGradient(
-        colors: [Color.blue, Color.cyan.opacity(0.8)],
+        colors: [Color(red: 0.2, green: 0.4, blue: 0.9),
+                 Color(red: 0.1, green: 0.7, blue: 0.8)],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
-    private let cardBackground = Color(.secondarySystemBackground)
+    private let darkGradient = LinearGradient(
+        colors: [Color.black.opacity(0.8), Color(red: 0.1, green: 0.2, blue: 0.5)],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    
+    private let cardBackground = Color(.systemGray6)
     
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                Color(.systemBackground)
+                // Dark gradient background matching HomeView
+                darkGradient
                     .ignoresSafeArea()
                 
-                List {
-                    // Header Section
-                    Section {
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        // Enhanced Header Section
                         HStack {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 8) {
                                 Text("Your Habits")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
+                                    .font(.title)
+                                    .fontWeight(.heavy)
                                     .foregroundStyle(
                                         LinearGradient(
-                                            colors: [Color.primary, Color.blue],
+                                            colors: [.white, teal.opacity(0.9)],
                                             startPoint: .leading,
                                             endPoint: .trailing
                                         )
                                     )
                                 
-                                Text("\(habits.count) total • \(habits.filter { $0.isCompletedToday }.count) completed today")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                HStack(spacing: 8) {
+                                    // Total count pill
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "square.stack.fill")
+                                            .font(.caption2)
+                                        Text("\(habits.count) total")
+                                            .font(.caption)
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 4)
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(Capsule())
+                                    
+                                    // Completed today pill
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.caption2)
+                                            .foregroundColor(.green)
+                                        Text("\(habits.filter { $0.isCompletedToday }.count) today")
+                                            .font(.caption)
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 4)
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(Capsule())
+                                }
+                                .foregroundColor(.white.opacity(0.9))
                             }
                             
                             Spacer()
                             
-                            // Stats pill
+                            // Enhanced stats pill
                             let completionPercentage = habits.isEmpty ? 0 : Int((Double(habits.filter { $0.isCompletedToday }.count) / Double(habits.count)) * 100)
-                            Text("\(completionPercentage)%")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    Capsule()
-                                        .fill(primaryGradient.opacity(0.2))
-                                )
-                                .foregroundColor(.blue)
-                                .overlay(
-                                    Capsule()
-                                        .stroke(
-                                            LinearGradient(
-                                                colors: [Color.blue.opacity(0.5), Color.cyan.opacity(0.5)],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            ),
-                                            lineWidth: 1
-                                        )
-                                )
-                        }
-                        .padding(.vertical, 8)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    }
-                    
-                    // Habits List
-                    ForEach(habits) { habit in
-                        HabitRowView(habit: habit)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    selectedHabit = habit
+                            ZStack {
+                                Circle()
+                                    .stroke(deepBlue.opacity(0.3), lineWidth: 3)
+                                    .frame(width: 60, height: 60)
+                                
+                                Circle()
+                                    .trim(from: 0, to: CGFloat(completionPercentage) / 100)
+                                    .stroke(
+                                        primaryGradient,
+                                        style: StrokeStyle(lineWidth: 3, lineCap: .round)
+                                    )
+                                    .frame(width: 60, height: 60)
+                                    .rotationEffect(.degrees(-90))
+                                
+                                VStack(spacing: 0) {
+                                    Text("\(completionPercentage)")
+                                        .font(.title3)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                    Text("%")
+                                        .font(.caption2)
+                                        .foregroundColor(.white.opacity(0.7))
                                 }
                             }
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.secondarySystemBackground))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .shadow(color: .blue.opacity(0.1), radius: 5, x: 0, y: 2)
-                            )
-                    }
-                    .onDelete { indexSet in
-                        withAnimation {
-                            viewModel.deleteHabit(at: indexSet)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        
+                        // Habits List
+                        ForEach(habits) { habit in
+                            HabitRowView(habit: habit)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        selectedHabit = habit
+                                    }
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(.ultraThinMaterial)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(
+                                                    LinearGradient(
+                                                        colors: [.white.opacity(0.2), teal.opacity(0.3)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 1
+                                                )
+                                        )
+                                )
+                                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                        }
+                        .onDelete { indexSet in
+                            withAnimation {
+                                viewModel.deleteHabit(at: indexSet)
+                            }
+                        }
+                        
+                        // Empty state
+                        if habits.isEmpty {
+                            VStack(spacing: 20) {
+                                Image(systemName: "square.stack.3d.up.slash")
+                                    .font(.system(size: 60))
+                                    .foregroundStyle(primaryGradient)
+                                
+                                Text("No habits yet")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                
+                                Text("Tap the + button to create your first habit")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .multilineTextAlignment(.center)
+                                
+                                Button(action: { showingForm = true }) {
+                                    HStack {
+                                        Image(systemName: "plus.circle.fill")
+                                        Text("Create Habit")
+                                    }
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        Capsule()
+                                            .fill(primaryGradient)
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(.white.opacity(0.3), lineWidth: 1)
+                                            )
+                                    )
+                                }
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 40)
                         }
                     }
+                    .padding(.vertical)
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: { dismiss() }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.footnote)
-                                .fontWeight(.semibold)
+                        HStack(spacing: 6) {
+                            Image(systemName: "chevron.left.circle.fill")
+                                .font(.title3)
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(primaryGradient)
                             Text("Back")
                                 .font(.body)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white)
                         }
-                        .foregroundStyle(primaryGradient)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(.white.opacity(0.2), lineWidth: 1)
+                        )
                     }
                 }
                 
@@ -131,7 +223,7 @@ struct HabitListView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [Color.primary, Color.blue],
+                                colors: [.white, teal],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -142,8 +234,17 @@ struct HabitListView: View {
                     Button(action: { showingForm = true }) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
-                            .foregroundStyle(primaryGradient)
-                            .symbolRenderingMode(.hierarchical)
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                            .background(
+                                Circle()
+                                    .fill(primaryGradient)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(.white.opacity(0.3), lineWidth: 2)
+                                    )
+                            )
+                            .shadow(color: deepBlue.opacity(0.5), radius: 8, x: 0, y: 4)
                     }
                 }
             }
@@ -206,33 +307,6 @@ struct HabitListPreviewWrapper: View {
                 reminderTime: Date(),
                 reminderEnabled: true,
                 notes: "Morning meditation"
-            ),
-            Habit(
-                id: UUID(),
-                type: .reading,
-                streakCount: 5,
-                lastCompletedDate: nil,
-                reminderTime: nil,
-                reminderEnabled: false,
-                notes: nil
-            ),
-            Habit(
-                id: UUID(),
-                type: .dailyWalk,
-                streakCount: 2,
-                lastCompletedDate: nil,
-                reminderTime: nil,
-                reminderEnabled: false,
-                notes: nil
-            ),
-            Habit(
-                id: UUID(),
-                type: .screenOff,
-                streakCount: 4,
-                lastCompletedDate: nil,
-                reminderTime: Date(),
-                reminderEnabled: true,
-                notes: "No screens after 10:30"
             )
         ]
         

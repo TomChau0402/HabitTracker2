@@ -13,15 +13,27 @@ struct HabitFormView: View {
     @State private var notes = ""
     @State private var showingDeleteAlert = false
     
-    // Custom colors matching HomeView
-    private let primaryGradient = LinearGradient(
-        colors: [Color.blue, Color.cyan.opacity(0.8)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    // Enhanced color scheme matching HomeView with darker tones
+    private let deepBlue = Color(red: 0.2, green: 0.4, blue: 0.9)
+    private let teal = Color(red: 0.1, green: 0.7, blue: 0.8)
+    private let darkBlue = Color(red: 0.1, green: 0.2, blue: 0.5)
     
-    private let cardBackground = Color(.secondarySystemBackground)
-    private let accentColor = Color.blue
+    // Computed properties for gradients
+    private var primaryGradient: LinearGradient {
+        LinearGradient(
+            colors: [deepBlue, teal],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
+    private var cardGradient: LinearGradient {
+        LinearGradient(
+            colors: [.white.opacity(0.1), .white.opacity(0.05)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
     
     init(existingHabit: Habit? = nil) {
         self.existingHabit = existingHabit
@@ -34,20 +46,47 @@ struct HabitFormView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                Color(.systemBackground)
-                    .ignoresSafeArea()
+                // Dark gradient background matching HomeView
+                LinearGradient(
+                    colors: [Color.black.opacity(0.8), darkBlue],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
                 
                 ScrollView {
                     VStack(spacing: 24) {
                         // Header with icon
                         VStack(spacing: 16) {
-                            // Animated icon based on selected type
+                            // Animated icon based on selected type with enhanced design
                             ZStack {
+                                // Glow effect
+                                Circle()
+                                    .fill(deepBlue.opacity(0.3))
+                                    .frame(width: 120, height: 120)
+                                    .blur(radius: 20)
+                                
+                                // Background circle
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .frame(width: 110, height: 110)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [.white.opacity(0.3), teal.opacity(0.3)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 2
+                                            )
+                                    )
+                                
+                                // Inner gradient circle
                                 Circle()
                                     .fill(
                                         LinearGradient(
-                                            colors: [Color.blue.opacity(0.2), Color.cyan.opacity(0.2)],
+                                            colors: [deepBlue.opacity(0.2), teal.opacity(0.2)],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
@@ -58,7 +97,7 @@ struct HabitFormView: View {
                                     .font(.system(size: 50))
                                     .foregroundStyle(
                                         LinearGradient(
-                                            colors: [Color.blue, Color.cyan],
+                                            colors: [.white, teal],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
@@ -72,7 +111,7 @@ struct HabitFormView: View {
                                 .fontWeight(.bold)
                                 .foregroundStyle(
                                     LinearGradient(
-                                        colors: [Color.primary, Color.blue],
+                                        colors: [.white, teal],
                                         startPoint: .leading,
                                         endPoint: .trailing
                                     )
@@ -82,14 +121,14 @@ struct HabitFormView: View {
                         // Form Fields
                         VStack(spacing: 20) {
                             // Habit Type Selection Card
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 16) {
                                 Label {
                                     Text("Habit Type")
                                         .font(.headline)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.white)
                                 } icon: {
                                     Image(systemName: "figure.mind.body")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(teal)
                                 }
                                 
                                 ScrollView(.horizontal, showsIndicators: false) {
@@ -98,7 +137,9 @@ struct HabitFormView: View {
                                             HabitTypeButton(
                                                 type: type,
                                                 isSelected: selectedType == type,
-                                                action: { selectedType = type }
+                                                action: { selectedType = type },
+                                                deepBlue: deepBlue,
+                                                teal: teal
                                             )
                                         }
                                     }
@@ -106,38 +147,51 @@ struct HabitFormView: View {
                                 }
                             }
                             .padding()
-                            .background(cardBackground)
-                            .cornerRadius(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [.white.opacity(0.2), teal.opacity(0.3)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 1
+                                            )
+                                    )
+                            )
                             
                             // Daily Target Card
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 16) {
                                 Label {
                                     Text("Daily Target")
                                         .font(.headline)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.white)
                                 } icon: {
                                     Image(systemName: "target")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(teal)
                                 }
                                 
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text("Your goal")
                                             .font(.subheadline)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(.white.opacity(0.6))
                                         Text(selectedType.targetDisplayValue)
                                             .font(.title2)
                                             .fontWeight(.bold)
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(teal)
                                     }
                                     
                                     Spacer()
                                     
-                                    // Target visualization
+                                    // Target visualization with enhanced design
                                     ZStack {
                                         Circle()
-                                            .stroke(Color.blue.opacity(0.2), lineWidth: 4)
-                                            .frame(width: 60, height: 60)
+                                            .stroke(deepBlue.opacity(0.3), lineWidth: 4)
+                                            .frame(width: 70, height: 70)
                                         
                                         Circle()
                                             .trim(from: 0, to: 1.0)
@@ -145,104 +199,189 @@ struct HabitFormView: View {
                                                 primaryGradient,
                                                 style: StrokeStyle(lineWidth: 4, lineCap: .round)
                                             )
-                                            .frame(width: 60, height: 60)
+                                            .frame(width: 70, height: 70)
                                             .rotationEffect(.degrees(-90))
+                                            .shadow(color: teal.opacity(0.3), radius: 5, x: 0, y: 2)
                                         
-                                        Text("100%")
-                                            .font(.caption2)
-                                            .fontWeight(.bold)
-                                            .foregroundColor(.blue)
+                                        VStack(spacing: 0) {
+                                            Text("100")
+                                                .font(.headline)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.white)
+                                            Text("%")
+                                                .font(.caption2)
+                                                .foregroundColor(teal)
+                                        }
                                     }
                                 }
                             }
                             .padding()
-                            .background(cardBackground)
-                            .cornerRadius(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [.white.opacity(0.2), teal.opacity(0.3)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 1
+                                            )
+                                    )
+                            )
                             
                             // Reminder Card
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 16) {
                                 Label {
                                     Text("Reminder")
                                         .font(.headline)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.white)
                                 } icon: {
                                     Image(systemName: "bell.fill")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(teal)
                                 }
                                 
                                 Toggle(isOn: $reminderEnabled.animation()) {
                                     Text("Enable daily reminder")
                                         .font(.subheadline)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.white)
                                 }
-                                .toggleStyle(SwitchToggleStyle(tint: .blue))
+                                .toggleStyle(SwitchToggleStyle(tint: teal))
                                 
                                 if reminderEnabled {
-                                    VStack(alignment: .leading, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 12) {
                                         Text("Reminder Time")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(.white.opacity(0.6))
                                         
                                         HStack {
-                                            Image(systemName: "clock.fill")
-                                                .foregroundColor(.blue)
+                                            // Time icon with glow
+                                            ZStack {
+                                                Circle()
+                                                    .fill(deepBlue.opacity(0.2))
+                                                    .frame(width: 40, height: 40)
+                                                    .blur(radius: 8)
+                                                
+                                                Circle()
+                                                    .fill(.ultraThinMaterial)
+                                                    .frame(width: 40, height: 40)
+                                                    .overlay(
+                                                        Circle()
+                                                            .stroke(teal.opacity(0.3), lineWidth: 1)
+                                                    )
+                                                
+                                                Image(systemName: "clock.fill")
+                                                    .font(.system(size: 16))
+                                                    .foregroundColor(teal)
+                                            }
                                             
                                             DatePicker("", selection: $reminderTime, displayedComponents: .hourAndMinute)
                                                 .labelsHidden()
                                                 .datePickerStyle(.compact)
-                                                .accentColor(.blue)
+                                                .colorScheme(.dark)
+                                                .accentColor(teal)
                                             
                                             Spacer()
+                                            
+                                            // Time display pill
+                                            Text(reminderTime, style: .time)
+                                                .font(.system(.body, design: .rounded))
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(teal)
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 6)
+                                                .background(
+                                                    Capsule()
+                                                        .fill(.ultraThinMaterial)
+                                                        .overlay(
+                                                            Capsule()
+                                                                .stroke(teal.opacity(0.3), lineWidth: 1)
+                                                        )
+                                                )
                                         }
                                         .padding()
-                                        .background(Color.blue.opacity(0.1))
-                                        .cornerRadius(12)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .fill(.ultraThinMaterial.opacity(0.5))
+                                        )
                                     }
                                     .transition(.opacity.combined(with: .slide))
                                 }
                             }
                             .padding()
-                            .background(cardBackground)
-                            .cornerRadius(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [.white.opacity(0.2), teal.opacity(0.3)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 1
+                                            )
+                                    )
+                            )
                             
                             // Notes Card
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 16) {
                                 Label {
                                     Text("Notes")
                                         .font(.headline)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.white)
                                 } icon: {
                                     Image(systemName: "note.text")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(teal)
                                 }
                                 
                                 TextEditor(text: $notes)
                                     .frame(height: 100)
                                     .padding(8)
-                                    .background(Color(.systemBackground))
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(.ultraThinMaterial.opacity(0.5))
+                                    )
                                     .cornerRadius(12)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 12)
                                             .stroke(
                                                 LinearGradient(
-                                                    colors: [Color.blue.opacity(0.3), Color.cyan.opacity(0.3)],
+                                                    colors: [deepBlue.opacity(0.5), teal.opacity(0.5)],
                                                     startPoint: .leading,
                                                     endPoint: .trailing
                                                 ),
                                                 lineWidth: 1
                                             )
                                     )
+                                    .colorScheme(.dark)
                                 
                                 if notes.isEmpty {
                                     Text("Add any additional notes or motivation...")
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(.white.opacity(0.5))
                                         .padding(.leading, 4)
                                 }
                             }
                             .padding()
-                            .background(cardBackground)
-                            .cornerRadius(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [.white.opacity(0.2), teal.opacity(0.3)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 1
+                                            )
+                                    )
+                            )
                             
                             // Delete Button (only for existing habits)
                             if existingHabit != nil {
@@ -255,11 +394,13 @@ struct HabitFormView: View {
                                     .font(.headline)
                                     .foregroundColor(.red)
                                     .padding()
-                                    .background(Color.red.opacity(0.1))
-                                    .cornerRadius(16)
-                                    .overlay(
+                                    .background(
                                         RoundedRectangle(cornerRadius: 16)
-                                            .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                                            .fill(.ultraThinMaterial)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(Color.red.opacity(0.5), lineWidth: 1)
+                                            )
                                     )
                                 }
                                 .padding(.top, 8)
@@ -276,7 +417,11 @@ struct HabitFormView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: { dismiss() }) {
                         Text("Cancel")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.7))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Capsule())
                     }
                 }
                 
@@ -286,7 +431,7 @@ struct HabitFormView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [Color.primary, Color.blue],
+                                colors: [.white, teal],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -297,7 +442,18 @@ struct HabitFormView: View {
                     Button(action: saveHabit) {
                         Text("Save")
                             .fontWeight(.semibold)
-                            .foregroundStyle(primaryGradient)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(
+                                Capsule()
+                                    .fill(primaryGradient)
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(.white.opacity(0.3), lineWidth: 1)
+                                    )
+                            )
+                            .shadow(color: deepBlue.opacity(0.5), radius: 8, x: 0, y: 4)
                     }
                 }
             }
@@ -341,28 +497,51 @@ struct HabitTypeButton: View {
     let type: HabitType
     let isSelected: Bool
     let action: () -> Void
+    let deepBlue: Color
+    let teal: Color
     
-    private let primaryGradient = LinearGradient(
-        colors: [Color.blue, Color.cyan.opacity(0.8)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    private var selectedGradient: LinearGradient {
+        LinearGradient(
+            colors: [deepBlue, teal],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
     
     var body: some View {
         Button(action: action) {
             VStack(spacing: 8) {
                 ZStack {
+                    // Glow effect when selected
+                    if isSelected {
+                        Circle()
+                            .fill(deepBlue.opacity(0.3))
+                            .frame(width: 70, height: 70)
+                            .blur(radius: 10)
+                    }
+                    
                     Circle()
                         .fill(
                             isSelected ?
-                            primaryGradient :
-                            LinearGradient(
-                                colors: [Color.gray.opacity(0.1), Color.gray.opacity(0.2)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+                            selectedGradient :
+                                LinearGradient(
+                                    colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.3)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
                         )
                         .frame(width: 60, height: 60)
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    isSelected ?
+                                        .white.opacity(0.5) :
+                                        .white.opacity(0.1),
+                                    lineWidth: isSelected ? 2 : 1
+                                )
+                        )
+                        .shadow(color: isSelected ? deepBlue.opacity(0.5) : .clear,
+                               radius: 8, x: 0, y: 4)
                     
                     Image(systemName: type.icon)
                         .font(.title2)
@@ -373,7 +552,7 @@ struct HabitTypeButton: View {
                     .font(.caption2)
                     .fontWeight(isSelected ? .semibold : .regular)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(isSelected ? .blue : .secondary)
+                    .foregroundColor(isSelected ? .white : .gray)
                     .lineLimit(2)
                     .frame(width: 70)
                     .minimumScaleFactor(0.8)
@@ -402,7 +581,7 @@ struct HabitTypeButton: View {
         notes: "Meditate in the morning for clarity and focus"
     )
     
-    return HabitFormPreviewView(existingHabit: habit)
+    HabitFormPreviewView(existingHabit: habit)
 }
 
 #Preview("Dark Mode") {
@@ -432,8 +611,3 @@ struct HabitFormPreviewView: View {
             .modelContainer(container)
     }
 }
-// MARK: - Previews (FIXED with all required parameters)
-
-
-
-
